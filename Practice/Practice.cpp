@@ -7,7 +7,6 @@
 #define MAX_LOADSTRING          100
 #define CMD_BUTTON_START        1001
 #define THREADCOUNT             3
-
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
@@ -146,7 +145,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SendMessage(active, LB_ADDSTRING, 100, (LPARAM)L"Mutex OK");
         }*/
 
-        Semaphore = CreateSemaphore(NULL, NULL, 3, NULL);
+        Semaphore = CreateSemaphore(NULL, THREADCOUNT, THREADCOUNT, NULL);
+
         if (Semaphore == NULL)
         {
             MessageBoxW(0, L"Semaphore error!", L"Error", MB_ICONERROR);
@@ -251,7 +251,10 @@ DWORD WINAPI ThreadProc(LPVOID params) {
         break;
 
     default:
-    {}
+     {
+        _snwprintf_s(txt, 100, L"%d error %d", data->month, GetLastError());
+        SendMessageW(total, LB_ADDSTRING, 100, (LPARAM)txt);
+     }
     }
 
 
@@ -263,22 +266,8 @@ void StartThread() {
     SendMessageW(total, LB_RESETCONTENT, 0, 0);
     SendMessageW(active, LB_RESETCONTENT, 0, 0);
     
-   /* for (int i = 1; i <= 12; i++)
+    for (int i = 1; i <= 12; i++)
     {
         CreateThread(NULL, 0, ThreadProc, new ThreadData(i, 10), 0, NULL);
-    }*/
-
-    for (int i = 0; i < THREADCOUNT; i++)
-    {
-        SemaphoreHandle[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadProc, new ThreadData(i, 10), 0, 0);
-        if (SemaphoreHandle[i] == NULL)
-        {
-            _snwprintf_s(txt, 100, L"CreateThread error: %d", GetLastError());
-            SendMessage(active, LB_ADDSTRING, 100, (LPARAM)txt);
-            return;
-        }
-
     }
-
-   
 }
